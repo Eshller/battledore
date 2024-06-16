@@ -1,113 +1,242 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Confetti from 'react-confetti';
+import type { NextPage } from 'next';
+
+const Home: NextPage = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [player1, setPlayer1] = useState('');
+  const [player2, setPlayer2] = useState('');
+  const [sender, setSender] = useState('');
+  const [receiver, setReceiver] = useState('');
+  const [duration, setDuration] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [showTimer, setShowTimer] = useState(false);
+  const [score1, setScore1] = useState(0);
+  const [score2, setScore2] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showTimer && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && showTimer) {
+      setGameOver(true);
+      setWinner(getWinner());
+    }
+
+    return () => clearInterval(timer);
+  }, [showTimer, timeLeft]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setTimeLeft(duration * 60); // Convert minutes to seconds
+    setShowTimer(true);
+    setGameOver(false);
+    setWinner(null);
+  };
+
+  const handlePlayClick = () => {
+    setShowForm(true);
+  };
+
+  const handleAddTime = (additionalMinutes: number) => {
+    setTimeLeft((prevTime) => prevTime + additionalMinutes * 60);
+    setGameOver(false);
+    setWinner(null);
+  };
+
+  const handleIncreaseScore1 = () => {
+    setScore1((prevScore) => prevScore + 1);
+  };
+
+  const handleIncreaseScore2 = () => {
+    setScore2((prevScore) => prevScore + 1);
+  };
+
+  const getWinner = () => {
+    if (score1 > score2) {
+      return player1;
+    } else if (score2 > score1) {
+      return player2;
+    } else {
+      return "It's a tie!";
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className='flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-purple-600'>
+      {!showForm ? (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handlePlayClick}
+          className='px-8 py-4 text-2xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-500'
+        >
+          Play
+        </motion.button>
+      ) : !showTimer ? (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='w-full max-w-md p-8 bg-white rounded-lg shadow-lg'
+        >
+          <h2 className='mb-6 text-2xl font-bold text-center text-gray-800'>
+            Player Details
+          </h2>
+          <motion.form
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className='space-y-6'
+            onSubmit={handleSubmit}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+            <div>
+              <label className='block mb-2 text-lg font-semibold text-gray-700'>
+                Player 1 Name
+              </label>
+              <input
+                type='text'
+                value={player1}
+                onChange={(e) => setPlayer1(e.target.value)}
+                className='w-full px-4 py-2 text-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <div>
+              <label className='block mb-2 text-lg font-semibold text-gray-700'>
+                Player 2 Name
+              </label>
+              <input
+                type='text'
+                value={player2}
+                onChange={(e) => setPlayer2(e.target.value)}
+                className='w-full px-4 py-2 text-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <div>
+              <label className='block mb-2 text-lg font-semibold text-gray-700'>
+                Choose Sender
+              </label>
+              <select
+                value={sender}
+                onChange={(e) => setSender(e.target.value)}
+                className='w-full px-4 py-2 text-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              >
+                <option value=''>Select Sender</option>
+                <option value='player1'>Player 1</option>
+                <option value='player2'>Player 2</option>
+              </select>
+            </div>
+            <div>
+              <label className='block mb-2 text-lg font-semibold text-gray-700'>
+                Choose Receiver
+              </label>
+              <select
+                value={receiver}
+                onChange={(e) => setReceiver(e.target.value)}
+                className='w-full px-4 py-2 text-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              >
+                <option value=''>Select Receiver</option>
+                <option value='player1'>Player 1</option>
+                <option value='player2'>Player 2</option>
+              </select>
+            </div>
+            <div>
+              <label className='block mb-2 text-lg font-semibold text-gray-700'>
+                Duration (minutes)
+              </label>
+              <input
+                type='number'
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+                className='w-full px-4 py-2 text-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type='submit'
+              className='w-full px-4 py-2 text-lg font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-500'
+            >
+              Submit
+            </motion.button>
+          </motion.form>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='w-full max-w-md p-8 bg-white rounded-lg shadow-lg text-center'
         >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <h2 className='mb-4 text-2xl font-bold text-gray-800'>{`${player1} vs ${player2}`}</h2>
+          <div className='mb-4 text-xl font-semibold text-gray-700'>{`Time Left: ${Math.floor(
+            timeLeft / 60
+          )}:${String(timeLeft % 60).padStart(2, '0')}`}</div>
+          <div className='text-lg font-semibold text-gray-700'>{`Sender: ${
+            sender === 'player1' ? player1 : player2
+          }`}</div>
+          <div className='text-lg font-semibold text-gray-700'>{`Receiver: ${
+            receiver === 'player1' ? player1 : player2
+          }`}</div>
+          <div className='mt-6 space-y-4'>
+            <div className='flex justify-between items-center'>
+              <span className='text-lg font-bold text-gray-800'>{player1}</span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleIncreaseScore1}
+                className='px-4 py-2 text-lg font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-500'
+              >
+                Increase Score
+              </motion.button>
+              <span className='text-lg font-bold text-gray-800'>{score1}</span>
+            </div>
+            <div className='flex justify-between items-center'>
+              <span className='text-lg font-bold text-gray-800'>{player2}</span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleIncreaseScore2}
+                className='px-4 py-2 text-lg font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-500'
+              >
+                Increase Score
+              </motion.button>
+              <span className='text-lg font-bold text-gray-800'>{score2}</span>
+            </div>
+          </div>
+          {gameOver && (
+            <>
+              <Confetti />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className='mt-6'
+              >
+                <div className='mb-4 text-2xl font-bold text-red-600'>
+                  Time Over
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleAddTime(5)}
+                  className='px-4 py-2 text-lg font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-500'
+                >
+                  Add 5 More Minutes
+                </motion.button>
+                <div className='mt-4 text-xl font-semibold text-gray-800'>{`Winner: ${getWinner()}`}</div>
+              </motion.div>
+            </>
+          )}
+        </motion.div>
+      )}
+    </div>
   );
-}
+};
+
+export default Home;
